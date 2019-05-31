@@ -1,2 +1,2 @@
-# ti84-pce-prototypes
+# ti84pce-prototypes
 Prototypes programs made for the TI84+ CE 

@@ -1,2 +1,3 @@
 # ti84pce-prototypes
-Prototypes programs made for the TI84+ CE 
+
+An assortment of applications written for the TI84 Plus CE calculator.

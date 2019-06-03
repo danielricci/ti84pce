@@ -2,71 +2,50 @@
 Listing for file "includes/ti84pce.inc"
 Listing for file "PixelColors.asm"
     2 00:0000 -  -  -  -  
-    3 00:0000 -  -  -  -  #define BLACK_COLOR 0
-    4 00:0000 -  -  -  -  #define vBuf1 vRAM
-    5 00:0000 -  -  -  -  #define vBuf2 vBuf1+(320*240)
-    6 00:0000 -  -  -  -  
-    7 00:0000 -  -  -  -  .assume ADL=1
-    8 00:0000 -  -  -  -  .org userMem-2
-    9 D1:A87F EF 7B -  -  .db tExtTok, tAsm84CeCmp
-   10 D1:A881 CD 10 08 02     call _ClrScrnFull
-   11 D1:A885 CD 28 08 02     call _HomeUp
-   12 D1:A889 CD 48 08 02     call _RunIndicOff
-   13 D1:A88D -  -  -  -  
-   14 D1:A88D -  -  -  -      ;call colorScreen
-   15 D1:A88D -  -  -  -  	;call colorGreen
-   16 D1:A88D CD 9E A8 D1 	call fillScreen
-   17 D1:A891 CD 8C 0D 02     call _GetKey
-   18 D1:A895 -  -  -  -  	;call colorBlue
-   19 D1:A895 -  -  -  -      ;call _GetKey
-   20 D1:A895 -  -  -  -  	;call colorRed
-   21 D1:A895 -  -  -  -      ;call _GetKey
-   22 D1:A895 CD 14 08 02     call _ClrScrn
-   23 D1:A899 CD 3C 1A 02 	call _DrawStatusBar
-   24 D1:A89D C9 -  -  -      ret
-   25 D1:A89E -  -  -  -  
-   26 D1:A89E -  -  -  -  ; Fill VRAM with the 16-bit color in de
-   27 D1:A89E -  -  -  -  fillScreen:
-   28 D1:A89E 11 00 F8 00 	ld de,$F800
-   29 D1:A8A2 21 00 00 D4 	ld hl,vRam
-   30 D1:A8A6 ED 1F -  -  	ld (hl),de
-   31 D1:A8A8 11 02 00 D4 	ld de,vRam+2
-   32 D1:A8AC 01 FE 57 02 	ld bc,lcdWidth*lcdHeight*2-2
-   33 D1:A8B0 ED B0 -  -  	ldir
-   34 D1:A8B2 C9 -  -  -  	ret
-   35 D1:A8B3 -  -  -  -  
-   36 D1:A8B3 -  -  -  -  colorBlue:
-   37 D1:A8B3 21 00 00 D4 	ld hl,vRam
-   38 D1:A8B7 36 F8 -  -  	ld (hl),%11111000
-   39 D1:A8B9 23 -  -  -  	inc hl
-   40 D1:A8BA 36 00 -  -  	ld (hl),%00000000
-   41 D1:A8BC C9 -  -  -  	ret
-   42 D1:A8BD -  -  -  -  
-   43 D1:A8BD -  -  -  -  colorRed:
-   44 D1:A8BD 21 00 00 D4 	ld hl,vRam
-   45 D1:A8C1 36 07 -  -  	ld (hl),%00000111
-   46 D1:A8C3 23 -  -  -  	inc hl
-   47 D1:A8C4 36 E0 -  -  	ld (hl),%11100000
-   48 D1:A8C6 C9 -  -  -  	ret
-   49 D1:A8C7 -  -  -  -  
-   50 D1:A8C7 -  -  -  -  colorGreen:
-   51 D1:A8C7 21 00 00 D4 	ld hl,vRam
-   52 D1:A8CB 36 E0 -  -  	ld (hl),%11100000
-   53 D1:A8CD 23 -  -  -  	inc hl
-   54 D1:A8CE 36 07 -  -  	ld (hl),%00000111
-   55 D1:A8D0 C9 -  -  -  	ret
-   56 D1:A8D1 -  -  -  -  
-   57 D1:A8D1 -  -  -  -  colorScreen:
-   58 D1:A8D1 21 00 00 D4 	ld hl,vRam
-   59 D1:A8D5 36 41 -  -  	ld (hl),$41
-   60 D1:A8D7 11 01 00 D4 	ld de,vRam+1
-   61 D1:A8DB 01 FE 57 02 	ld bc,(vRamEnd-vRam)-2
-   62 D1:A8DF ED B0 -  -  	ldir
-   63 D1:A8E1 C9 -  -  -  	ret
-   64 D1:A8E2 -  -  -  -  
-   65 D1:A8E2 -  -  -  -  clearScreen:
-   66 D1:A8E2 3E 00 -  -  	ld a,$00
-   67 D1:A8E4 01 00 58 02 	ld bc,320*240*2
-   68 D1:A8E8 21 00 00 D4 	ld hl,vRam
-   69 D1:A8EC CD DC 10 02 	call _MemClear
-   70 D1:A8F0 C9 -  -  -      ret
+    3 00:0000 -  -  -  -  .assume ADL=1
+    4 00:0000 -  -  -  -  .org userMem-2
+    5 D1:A87F EF 7B -  -  .db tExtTok, tAsm84CeCmp
+    6 D1:A881 CD 10 08 02     call _ClrScrnFull
+    7 D1:A885 CD 28 08 02     call _HomeUp
+    8 D1:A889 CD 48 08 02     call _RunIndicOff
+    9 D1:A88D -  -  -  -  
+   10 D1:A88D -  -  -  -  mainLoop:
+   11 D1:A88D CD 8C 0D 02     call _getKey
+   12 D1:A891 FE 03 -  -      cp kUp
+   13 D1:A893 28 14 -  -      jr Z,colorGreen
+   14 D1:A895 FE 02 -  -      cp kLeft
+   15 D1:A897 28 0A -  -      jr Z,colorRed
+   16 D1:A899 FE 01 -  -      cp kRight
+   17 D1:A89B 28 12 -  -      jr Z,colorBlue
+   18 D1:A89D FE 04 -  -      cp kDown
+   19 D1:A89F 28 14 -  -      jr Z,colorBlack
+   20 D1:A8A1 18 2A -  -      jr done
+   21 D1:A8A3 -  -  -  -  
+   22 D1:A8A3 -  -  -  -  colorRed:
+   23 D1:A8A3 11 00 F8 00     ld de,%1111100000000000
+   24 D1:A8A7 18 12 -  -      jr fillScreen
+   25 D1:A8A9 -  -  -  -  
+   26 D1:A8A9 -  -  -  -  colorGreen:
+   27 D1:A8A9 11 E0 07 00     ld de,%0000011111100000
+   28 D1:A8AD 18 0C -  -      jr fillScreen
+   29 D1:A8AF -  -  -  -  
+   30 D1:A8AF -  -  -  -  colorBlue:
+   31 D1:A8AF 11 1F 00 00     ld de,%0000000000011111
+   32 D1:A8B3 18 06 -  -      jr fillScreen
+   33 D1:A8B5 -  -  -  -  
+   34 D1:A8B5 -  -  -  -  colorBlack:
+   35 D1:A8B5 11 00 00 00     ld de,%0000000000000000
+   36 D1:A8B9 18 00 -  -      jr fillScreen
+   37 D1:A8BB -  -  -  -  
+   38 D1:A8BB -  -  -  -  fillScreen:
+   39 D1:A8BB 21 00 00 D4     ld hl,vRam
+   40 D1:A8BF ED 1F -  -      ld (hl),de
+   41 D1:A8C1 11 02 00 D4     ld de,vRam+2
+   42 D1:A8C5 01 FE 57 02     ld bc,lcdWidth*lcdHeight*2-2
+   43 D1:A8C9 ED B0 -  -      ldir
+   44 D1:A8CB 18 C0 -  -      jr mainLoop
+   45 D1:A8CD -  -  -  -  
+   46 D1:A8CD -  -  -  -  done:
+   47 D1:A8CD CD 14 08 02     call _ClrScrn
+   48 D1:A8D1 CD 3C 1A 02     call _DrawStatusBar
+   49 D1:A8D5 C9 -  -  -      ret

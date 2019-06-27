@@ -1,6 +1,6 @@
 This program colors the lcd a particular color depending on the arrow key pressed.
 
-![](pixelcolors.png)
+![](PixelColors.png)
 
 Up = Green
 Left = Red

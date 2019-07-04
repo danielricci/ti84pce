@@ -5,10 +5,7 @@
 .org userMem-2
 .db tExtTok, tAsm84CeCmp
 
-pixelX equ cmdpixelshadow
-pixelY equ pixelX+3
-color equ pixelY+1
-done equ color+1
+done equ cmdpixelshadow
 
 main:
     call _HomeUp

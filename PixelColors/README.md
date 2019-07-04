@@ -7,4 +7,4 @@ This program colors the lcd a particular color depending on the arrow key presse
 - Right = Blue
 - Down = Black
 
-Exit the game by pressing any other key.
+Exit the program by pressing any other key.

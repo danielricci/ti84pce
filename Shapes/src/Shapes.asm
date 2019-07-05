@@ -19,6 +19,11 @@ clean:
 init:
     ld a,0
     ld (done),a
+clearScreen:
+    ld a,$FF
+    ld bc,vRamEnd-vRam
+    ld hl,vRam
+    call _MemSet
 main_loop:
     ld a,(done)
     cp 1
@@ -50,5 +55,8 @@ keyEnterPressed:
     ret
 update:
     ret
-render:
+render: ; Draw the actual lcd contents
+    ld hl,vRam
+    
+
     ret

@@ -5,10 +5,13 @@
 .db tExtTok,tAsm84CeCmp
 
 color .equ cmdPixelShadow
+dimensions .equ color+1
 
     call _RunIndicOff
-    ld a,$FE
+    ld a,$FF
     ld (color),a
+    ld hl,lcdWidth*lcdHeight
+    ld (dimensions),hl
 CopyHL1555Palette:
     ld hl,mpLcdPalette
     ld b,0
@@ -32,15 +35,15 @@ CopyHL1555PaletteLoop:
     ld a,lcdBpp8
     ld (mpLcdCtrl),a
 colorize:
+    ld a,(color)
+    ld hl,vRam
+    ld bc,(dimensions)
+    call _MemSet
+    dec a
+    ld (color),a
     call _getKey
     cp kClear
     jr z,exit
-    ld a,(color)
-    dec a
-    ld hl,vRam
-    ld bc,lcdWidth*lcdHeight
-    call _MemSet
-    ld (color),a
     cp a,0
     jr nz,colorize
 exit:

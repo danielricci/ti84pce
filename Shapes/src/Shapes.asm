@@ -24,7 +24,7 @@ init:
     ld (point),hl
     call copyHL1555Palette
     jr mainLoop
-; -----------------------------
+; --------------------------------------------------
 ; Clean up code before the application terminates
 ; --------------------------------------------------
 exit:

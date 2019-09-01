@@ -11,6 +11,7 @@ done .equ           cmdPixelShadow
 pointX .equ         cmdPixelShadow+1
 pointY .equ         cmdPixelShadow+4
 pointXY .equ        cmdPixelShadow+7
+borderFlags .equ    cmdPixelShadow+11 ;top,left,bottom,right
 ; --------------------------------------------------
 ; Entry point of the application
 ; --------------------------------------------------
@@ -20,10 +21,6 @@ init:
     call _ClrScrn
     ld a,0
     ld (done),a
-    ld a,159
-    ld (pointX),a
-    ld a,119
-    ld (pointY),a
     call copyHL1555Palette
     jr mainLoop
 ; --------------------------------------------------
@@ -31,8 +28,7 @@ init:
 ; --------------------------------------------------
 exit:
     call _ClrScrn
-    ld a,lcdBpp16
-    ld (mpLcdCtrl),a
+    call LCD_ResetPalette
     call _DrawStatusBar
     ret
 ; --------------------------------------------------
@@ -56,7 +52,7 @@ copyHL1555PaletteLoop:
     ld (hl),d
     inc hl
     inc b
-    jr nz,CopyHL1555PaletteLoop
+    jp nz,LCD_CopyHL1555Palette
     call _boot_ClearVRAM
     ld a,lcdBpp8
     ld (mpLcdCtrl),a
@@ -97,21 +93,12 @@ processInput:
     call Z,keyEnterPressed
     ret
 keyOnePressed: ;draws a point in the middle of display
-    call clearScreen
-    
-    ld a,24
-    ld bc,(pointY)
-    ld de,lcdWidth
-    call Math_Multiply_BC_DE
-
-    ld bc,(pointX)
-    add hl,bc
-    ld bc,vRam
-    add hl,bc
-
-    ld (pointXY),hl
-    ld (hl),color
-
+    ld a,159
+    ld (pointX),a
+    ld a,119
+    ld (pointY),a
+    call update
+    call render
     ret
 keyEnterPressed:
     ld a,1
@@ -156,8 +143,23 @@ keyRightPressed:
     ;ld (point),hl
     ;ld (hl),color
     ret
-updatePoint:
-    ;ld a,(pointY)
-    ;ld hl,a
+update:
+    ld bc,(pointY)
+    ld de,lcdWidth
+    ld a,24
+    call Math_Multiply_BC_DE
+
+    ld bc,(pointX)
+    add hl,bc
+    ld bc,vRam
+    add hl,bc
+
+    ld (pointXY),hl
     ret
-#include "../../Math/src/Math.asm"
+render:
+    call _ClrScrn
+    ld hl,(pointXY)
+    ld (hl),color
+    ret
+#include "../../Utils/LCD/src/LCD.asm"
+#include "../../Utils/Math/src/Math.asm"

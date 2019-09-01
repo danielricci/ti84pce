@@ -1,6 +1,4 @@
-.nolist
 #include "ti84pce.inc"
-.list
 .assume ADL=1
 .org userMem-2
 .db tExtTok, tAsm84CeCmp
@@ -8,9 +6,11 @@
 ; --------------------------------------------------
 ; Equates
 ; --------------------------------------------------
-done .equ cmdPixelShadow
-point .equ done+1
-color .equ $E0
+color .equ          $E0
+done .equ           cmdPixelShadow
+pointX .equ         cmdPixelShadow+1
+pointY .equ         cmdPixelShadow+4
+pointXY .equ        cmdPixelShadow+7
 ; --------------------------------------------------
 ; Entry point of the application
 ; --------------------------------------------------
@@ -20,8 +20,10 @@ init:
     call _ClrScrn
     ld a,0
     ld (done),a
-    ld hl,vRam+(lcdWidth/2)+(lcdWidth*(lcdHeight/2))
-    ld (point),hl
+    ld a,159
+    ld (pointX),a
+    ld a,119
+    ld (pointY),a
     call copyHL1555Palette
     jr mainLoop
 ; --------------------------------------------------
@@ -73,8 +75,6 @@ mainLoop:
     cp 1
     jr Z,exit
     call processInput
-    call update
-    call render
     jr mainLoop
 ; --------------------------------------------------
 ; Processes the user input key commands
@@ -85,12 +85,6 @@ processInput:
     call _getKey
     cp k1
     call Z,keyOnePressed
-    cp k2
-    call Z,keyTwoPressed
-    cp k3
-    call Z,keyThreePressed
-    cp k4
-    call Z,keyFourPressed
     cp kUp
     call Z,keyUpPressed
     cp kLeft
@@ -101,60 +95,69 @@ processInput:
     call Z,keyRightPressed
     cp kEnter
     call Z,keyEnterPressed
-    cp kClear
-    call Z,keyClearPressed
     ret
-keyOnePressed: ;point
+keyOnePressed: ;draws a point in the middle of display
     call clearScreen
-    ld hl,(point)
+    
+    ld a,24
+    ld bc,(pointY)
+    ld de,lcdWidth
+    call Math_Multiply_BC_DE
+
+    ld bc,(pointX)
+    add hl,bc
+    ld bc,vRam
+    add hl,bc
+
+    ld (pointXY),hl
     ld (hl),color
+
     ret
-keyTwoPressed:
-keyThreePressed:
-keyFourPressed:
 keyEnterPressed:
-keyClearPressed:
     ld a,1
     ld (done),a
     ret
 keyUpPressed:
-    call clearScreen
-    ld hl,(point)
-    ld bc, -lcdWidth
-    add hl,bc
-    ld (point),hl
-    ld (hl),color
+    ;call clearScreen
+    ;ld hl,(point)
+    ;ld bc, -lcdWidth
+    ;add hl,bc
+    ;ld (point),hl
+    ;ld (hl),color
     ret
 keyLeftPressed:
-    call clearScreen
-    ld hl,(point)
-    dec hl
-    ld (point),hl
-    ld (hl),color
+    ; Get the current position of the particle
+    ;or a,a
+    ;ld hl,(point)
+    ;ld bc,vRam
+    ;sbc hl,bc
+    ; Bounds check for valid position
+    ;ex de,hl
+    ;ld bc,lcdWidth
+    ;cp a,0
+    ;ld hl,(point)
+    ;dec hl
+    ;ld (point),hl
+    ;call clearScreen
+    ;ld (hl),color
     ret
 keyDownPressed:
-    call clearScreen
-    ld hl,(point)
-    ld bc,lcdWidth
-    add hl,bc
-    ld (point),hl
-    ld (hl),color
+    ;call clearScreen
+    ;ld hl,(point)
+    ;ld bc,lcdWidth
+    ;add hl,bc
+    ;ld (point),hl
+    ;ld (hl),color
     ret
 keyRightPressed:
     call clearScreen
-    ld hl,(point)
-    inc hl
-    ld (point),hl
-    ld (hl),color
+    ;ld hl,(point)
+    ;inc hl
+    ;ld (point),hl
+    ;ld (hl),color
     ret
-; --------------------------------------------------
-; Performs an update of the application by changing subsequent values based on
-; past user input
-; --------------------------------------------------
-update:
+updatePoint:
+    ;ld a,(pointY)
+    ;ld hl,a
     ret
-; --------------------------------------------------
-; Renders the content
-; --------------------------------------------------
-render:
-    ret
+#include "../../Math/src/Math.asm"

@@ -1,5 +1,5 @@
 ;#define DEBUG
-#ifndef DEBUG
+#ifdef DEBUG
 #include "ti84pce.inc"
 .assume ADL=1
 .org userMem-2

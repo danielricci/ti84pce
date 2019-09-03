@@ -21,7 +21,7 @@ init:
     call _ClrScrn
     ld a,0
     ld (done),a
-    call copyHL1555Palette
+    call LCD_CopyHL1555Palette
     jr mainLoop
 ; --------------------------------------------------
 ; Clean up code before the application terminates
@@ -30,32 +30,6 @@ exit:
     call _ClrScrn
     call LCD_ResetPalette
     call _DrawStatusBar
-    ret
-; --------------------------------------------------
-; Sets the color palette to an 8BPP format
-; --------------------------------------------------
-copyHL1555Palette:
-    ld hl,mpLcdPalette
-    ld b,0
-copyHL1555PaletteLoop:
-    ld d,b
-    ld a,b
-    and %11000000
-    srl d
-    rra
-    ld e,a
-    ld a,%00011111
-    and b
-    or e
-    ld (hl),a
-    inc hl
-    ld (hl),d
-    inc hl
-    inc b
-    jp nz,LCD_CopyHL1555Palette
-    call _boot_ClearVRAM
-    ld a,lcdBpp8
-    ld (mpLcdCtrl),a
     ret
 ; --------------------------------------------------
 ; Clears the screen by applying the color `white` to every pixel of the lcd
@@ -105,12 +79,11 @@ keyEnterPressed:
     ld (done),a
     ret
 keyUpPressed:
-    ;call clearScreen
-    ;ld hl,(point)
-    ;ld bc, -lcdWidth
-    ;add hl,bc
-    ;ld (point),hl
-    ;ld (hl),color
+    ld hl,(pointXY)
+    ld bc, -lcdWidth
+    add hl,bc
+    ld (pointXY),hl
+    ld (hl),color
     ret
 keyLeftPressed:
     ; Get the current position of the particle

@@ -24,3 +24,4 @@ copyHL1555Palette_Loop:
 LCD_ResetPalette:
     ld a,lcdBpp16
     ld (mpLcdCtrl),a
+    ret

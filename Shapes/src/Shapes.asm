@@ -6,12 +6,15 @@
 ; --------------------------------------------------
 ; Equates
 ; --------------------------------------------------
-color .equ          $E0
-done .equ           cmdPixelShadow
-pointX .equ         cmdPixelShadow+1
-pointY .equ         cmdPixelShadow+4
-pointXY .equ        cmdPixelShadow+7
-borderFlags .equ    cmdPixelShadow+11 ;top,left,bottom,right
+color           .equ        $E0
+initX           .equ        159
+initY           .equ        119
+done            .equ        cmdPixelShadow
+pointX          .equ        cmdPixelShadow+1
+pointY          .equ        cmdPixelShadow+4
+pointXYPrev     .equ        cmdPixelShadow+7
+pointXY         .equ        cmdPixelShadow+10
+
 ; --------------------------------------------------
 ; Entry point of the application
 ; --------------------------------------------------
@@ -19,10 +22,10 @@ init:
     call _HomeUp
     call _RunIndicOff
     call _ClrScrn
-    ld a,0
-    ld (done),a
     call LCD_CopyHL1555Palette
+    ld a,0
     jr mainLoop
+
 ; --------------------------------------------------
 ; Clean up code before the application terminates
 ; --------------------------------------------------
@@ -31,12 +34,7 @@ exit:
     call LCD_ResetPalette
     call _DrawStatusBar
     ret
-; --------------------------------------------------
-; Clears the screen by applying the color `white` to every pixel of the lcd
-; --------------------------------------------------
-clearScreen:
-    call _boot_ClearVRAM
-    ret
+
 ; --------------------------------------------------
 ; Main game loop
 ; --------------------------------------------------
@@ -46,10 +44,9 @@ mainLoop:
     jr Z,exit
     call processInput
     jr mainLoop
+
 ; --------------------------------------------------
 ; Processes the user input key commands
-; 
-; Note: Subsequent labels underneath handle the specified user input
 ; --------------------------------------------------
 processInput:
     call _getKey
@@ -66,11 +63,11 @@ processInput:
     cp kEnter
     call Z,keyEnterPressed
     ret
-keyOnePressed: ;draws a point in the middle of display
-    ld a,159
-    ld (pointX),a
-    ld a,119
-    ld (pointY),a
+keyOnePressed:
+    ld bc,initX
+    ld (pointX),bc
+    ld bc,initY
+    ld (pointY),bc
     call update
     call render
     ret
@@ -79,43 +76,61 @@ keyEnterPressed:
     ld (done),a
     ret
 keyUpPressed:
-    ld hl,(pointXY)
-    ld bc, -lcdWidth
+    ld hl,(pointY)
+    ld bc,0
+    or a
+    sbc hl,bc
     add hl,bc
-    ld (pointXY),hl
-    ld (hl),color
-    ret
-keyLeftPressed:
-    ; Get the current position of the particle
-    ;or a,a
-    ;ld hl,(point)
-    ;ld bc,vRam
-    ;sbc hl,bc
-    ; Bounds check for valid position
-    ;ex de,hl
-    ;ld bc,lcdWidth
-    ;cp a,0
-    ;ld hl,(point)
-    ;dec hl
-    ;ld (point),hl
-    ;call clearScreen
-    ;ld (hl),color
+    ret Z
+
+    dec hl
+    ld (pointY),hl
+    call update
+    call render
     ret
 keyDownPressed:
-    ;call clearScreen
-    ;ld hl,(point)
-    ;ld bc,lcdWidth
-    ;add hl,bc
-    ;ld (point),hl
-    ;ld (hl),color
+    ld hl,(pointY)
+    ld bc,239
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
+
+    inc hl
+    ld (pointY),hl
+    call update
+    call render
+    ret
+keyLeftPressed:
+    ld hl,(pointX)
+    ld bc,0
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
+
+    dec hl
+    ld (pointX),hl
+    call update
+    call render
     ret
 keyRightPressed:
-    call clearScreen
-    ;ld hl,(point)
-    ;inc hl
-    ;ld (point),hl
-    ;ld (hl),color
+    ld hl,(pointX)
+    ld bc,319
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
+
+    inc hl
+    ld (pointX),hl
+    call update
+    call render
     ret
+
+; --------------------------------------------------
+; Updates the (x,y) location data
+; --------------------------------------------------
 update:
     ld bc,(pointY)
     ld de,lcdWidth
@@ -129,10 +144,18 @@ update:
 
     ld (pointXY),hl
     ret
+
+; --------------------------------------------------
+; Renders the (x,y) location data
+; --------------------------------------------------
 render:
     call _ClrScrn
     ld hl,(pointXY)
     ld (hl),color
     ret
+
+; --------------------------------------------------
+; Includes
+; --------------------------------------------------
 #include "../../Utils/LCD/src/LCD.asm"
 #include "../../Utils/Math/src/Math.asm"

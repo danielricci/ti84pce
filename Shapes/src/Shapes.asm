@@ -1,19 +1,25 @@
 #include "ti84pce.inc"
+
 .assume ADL=1
 .org userMem-2
 .db tExtTok, tAsm84CeCmp
 
 ; --------------------------------------------------
-; Equates
+; Constants
 ; --------------------------------------------------
-color           .equ        $E0
-initX           .equ        159
-initY           .equ        119
-done            .equ        cmdPixelShadow
-pointX          .equ        cmdPixelShadow+1
-pointY          .equ        cmdPixelShadow+4
-pointXYPrev     .equ        cmdPixelShadow+7
-pointXY         .equ        cmdPixelShadow+10
+color       .equ        $E0
+
+; --------------------------------------------------
+; Memory Managed Equates
+; --------------------------------------------------
+done .equ cmdPixelShadow
+
+rectangle .equ done+1
+rectangle.x .equ rectangle
+rectangle.y .equ rectangle+3
+rectangle.w .equ rectangle+6
+rectangle.h .equ rectangle+9
+
 
 ; --------------------------------------------------
 ; Entry point of the application
@@ -52,6 +58,8 @@ processInput:
     call _getKey
     cp k1
     call Z,keyOnePressed
+    cp k2
+    call Z,keyTwoPressed
     cp kUp
     call Z,keyUpPressed
     cp kLeft
@@ -64,11 +72,24 @@ processInput:
     call Z,keyEnterPressed
     ret
 keyOnePressed:
-    ld bc,initX
-    ld (pointX),bc
-    ld bc,initY
-    ld (pointY),bc
-    call update
+    ld hl,159
+    ld (rectangle.x),hl
+    ld hl,119
+    ld (rectangle.y),hl
+    ld hl,1
+    ld (rectangle.w),hl
+    ld (rectangle.h),hl
+    call render
+    ret
+keyTwoPressed:
+    ld hl,159
+    ld (rectangle.x),hl
+    ld hl,119
+    ld (rectangle.y),hl
+    ld hl,3
+    ld (rectangle.w),hl
+    ld hl,3
+    ld (rectangle.h),hl
     call render
     ret
 keyEnterPressed:
@@ -76,82 +97,99 @@ keyEnterPressed:
     ld (done),a
     ret
 keyUpPressed:
-    ld hl,(pointY)
-    ld bc,0
-    or a
-    sbc hl,bc
-    add hl,bc
-    ret Z
+    ; ld hl,(pointY1)
+    ; ld bc,0
+    ; or a
+    ; sbc hl,bc
+    ; add hl,bc
+    ; ret Z
 
-    dec hl
-    ld (pointY),hl
-    call update
-    call render
+    ; dec hl
+    ; ld (pointY1),hl
+    ; ld hl,(pointY2)
+    ; dec hl
+    ; ld (pointY2),hl
+
+    ; call render
     ret
 keyDownPressed:
-    ld hl,(pointY)
-    ld bc,239
-    or a
-    sbc hl,bc
-    add hl,bc
-    ret Z
+    ; ld hl,(pointY)
+    ; ld bc,239
+    ; or a
+    ; sbc hl,bc
+    ; add hl,bc
+    ; ret Z
 
-    inc hl
-    ld (pointY),hl
-    call update
-    call render
+    ; inc hl
+    ; ld (pointY),hl
+    ; call update
     ret
 keyLeftPressed:
-    ld hl,(pointX)
-    ld bc,0
-    or a
-    sbc hl,bc
-    add hl,bc
-    ret Z
+    ; ld hl,(pointX)
+    ; ld bc,0
+    ; or a
+    ; sbc hl,bc
+    ; add hl,bc
+    ; ret Z
 
-    dec hl
-    ld (pointX),hl
-    call update
-    call render
+    ; dec hl
+    ; ld (pointX),hl
+    ; call update
     ret
 keyRightPressed:
-    ld hl,(pointX)
-    ld bc,319
-    or a
-    sbc hl,bc
-    add hl,bc
-    ret Z
+    ; ld hl,(pointX)
+    ; ld bc,319
+    ; or a
+    ; sbc hl,bc
+    ; add hl,bc
+    ; ret Z
 
-    inc hl
-    ld (pointX),hl
-    call update
-    call render
+    ; inc hl
+    ; ld (pointX),hl
+    ; call update
     ret
 
 ; --------------------------------------------------
-; Updates the (x,y) location data
-; --------------------------------------------------
-update:
-    ld bc,(pointY)
-    ld de,lcdWidth
-    ld a,24
-    call Math_Multiply_BC_DE
-
-    ld bc,(pointX)
-    add hl,bc
-    ld bc,vRam
-    add hl,bc
-
-    ld (pointXY),hl
-    ret
-
-; --------------------------------------------------
-; Renders the (x,y) location data
+; Render to the LCD
 ; --------------------------------------------------
 render:
     call _ClrScrn
-    ld hl,(pointXY)
+
+    ; Calculate (x,y)
+    ld bc,(rectangle.y)
+    ld de,lcdWidth
+    ld a,24
+    call Math_Multiply_BC_DE
+    ld bc,(rectangle.x)
+    add hl,bc
+    ld bc,vRam
+    add hl,bc
+    
+    ld a,(rectangle.h)
+    ld b,a
+render_loop_height:
+    push bc
+    ld a,(rectangle.w)
+    ld b,a
+render_pixel:
+    ; Draw pixel and increment print position
     ld (hl),color
+    inc hl
+    djnz render_pixel
+
+    ; Carriage return (CR)
+    ld de,0
+    ld e,a
+    or a
+    sbc hl,de
+
+    ; Line feed (LF)
+    ld de,lcdWidth
+    add hl,de
+
+    ; Draw a new line
+    pop bc
+    djnz render_loop_height
     ret
 
 ; --------------------------------------------------

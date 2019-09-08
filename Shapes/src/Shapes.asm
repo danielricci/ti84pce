@@ -97,63 +97,62 @@ keyEnterPressed:
     ld (done),a
     ret
 keyUpPressed:
-    ; ld hl,(pointY1)
-    ; ld bc,0
-    ; or a
-    ; sbc hl,bc
-    ; add hl,bc
-    ; ret Z
+    ld hl,(rectangle.y)
+    ld bc,0
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
 
-    ; dec hl
-    ; ld (pointY1),hl
-    ; ld hl,(pointY2)
-    ; dec hl
-    ; ld (pointY2),hl
-
-    ; call render
+    dec hl
+    ld (rectangle.y),hl
+    call render
     ret
 keyDownPressed:
-    ; ld hl,(pointY)
-    ; ld bc,239
-    ; or a
-    ; sbc hl,bc
-    ; add hl,bc
-    ; ret Z
+    ld hl,(rectangle.y)
+    ld bc,0
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
 
-    ; inc hl
-    ; ld (pointY),hl
-    ; call update
+    inc hl
+    ld (rectangle.y),hl
+    call render
     ret
 keyLeftPressed:
-    ; ld hl,(pointX)
-    ; ld bc,0
-    ; or a
-    ; sbc hl,bc
-    ; add hl,bc
-    ; ret Z
+    ld hl,(rectangle.x)
+    ld bc,0
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
 
-    ; dec hl
-    ; ld (pointX),hl
-    ; call update
+    dec hl
+    ld (rectangle.x),hl
+    call render
     ret
 keyRightPressed:
-    ; ld hl,(pointX)
-    ; ld bc,319
-    ; or a
-    ; sbc hl,bc
-    ; add hl,bc
-    ; ret Z
+    ld hl,(rectangle.x)
+    ld bc,319
+    or a
+    sbc hl,bc
+    add hl,bc
+    ret Z
 
-    ; inc hl
-    ; ld (pointX),hl
-    ; call update
+    inc hl
+    ld (rectangle.x),hl
+    call render
     ret
 
 ; --------------------------------------------------
 ; Render to the LCD
 ; --------------------------------------------------
 render:
-    call _ClrScrn
+    ;call _ClrScrnFull
+    ld a,$FF
+    ld bc,lcdWidth*lcdHeight
+    call LCD_ClearLCDHalf
 
     ; Calculate (x,y)
     ld bc,(rectangle.y)

@@ -1,4 +1,4 @@
 #! /bin/bash
 
 clear
-spasm -L -E -T -I includes "Math.asm" "../Math.8xp"
+spasm -L -E -T -I includes "LCD.asm" "../LCD.8xp"

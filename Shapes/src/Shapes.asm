@@ -110,11 +110,16 @@ keyUpPressed:
     ret
 keyDownPressed:
     ld hl,(rectangle.y)
-    ld bc,0
+    ld de,(rectangle.h)
+    dec de ; decrement because add the height offset doesnt take into consideration the first row
+    add hl,de
+    ld bc,239
     or a
     sbc hl,bc
     add hl,bc
     ret Z
+    or a
+    sbc hl,de
 
     inc hl
     ld (rectangle.y),hl

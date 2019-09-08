@@ -68,6 +68,8 @@ processInput:
     call Z,keyDownPressed
     cp kRight
     call Z,keyRightPressed
+    cp kClear
+    call Z,keyClearPressed
     cp kEnter
     call Z,keyEnterPressed
     ret
@@ -93,6 +95,8 @@ keyTwoPressed:
     call render
     ret
 keyEnterPressed:
+    ret
+keyClearPressed:
     ld a,1
     ld (done),a
     ret

@@ -143,11 +143,16 @@ keyLeftPressed:
     ret
 keyRightPressed:
     ld hl,(rectangle.x)
+    ld de,(rectangle.w)
+    dec de
+    add hl,de
     ld bc,319
     or a
     sbc hl,bc
     add hl,bc
     ret Z
+    or a
+    sbc hl,de
 
     inc hl
     ld (rectangle.x),hl

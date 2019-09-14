@@ -48,6 +48,8 @@ delay:
 	res	bTmr2Enable,(hl)
 	res	bTmr2Crystal,(hl)
 	res	bTmr2Overflow,(hl)
+	inc	hl
+	res	bTmr2CountUp-8,(hl)
 ; Set up timer 2 counter, match, and reload values.
 	ld	l,tmr2Counter+1
 	ld	(hl),de			; counter = millis*48000-768+0xxh

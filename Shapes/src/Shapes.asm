@@ -15,11 +15,10 @@ color       .equ        $E0
 done .equ cmdPixelShadow
 
 rectangle .equ done+1
-rectangle.x .equ rectangle
+rectangle.x .equ rectangle  
 rectangle.y .equ rectangle+3
 rectangle.w .equ rectangle+6
 rectangle.h .equ rectangle+9
-
 
 ; --------------------------------------------------
 ; Entry point of the application

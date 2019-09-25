@@ -8,25 +8,26 @@ dimensions .equ 3
 color .equ $E0
 
 done .equ cmdPixelShadow
-length .equ done+1
-snake .equ length+3
+snake .equ done+1
 snake.tail .equ snake
-snake.head .equ snake.tail+24
+snake.head .equ snake.tail+48
+snake.length .equ snake.head+6
 
 init:
+    ; Board setup
     call _HomeUp
     call _RunIndicOff
     call _ClrScrnFull
     call LCD_CopyHL1555Palette
 
-    ; Set the initial length of the snake
-    ld bc,5
-    ld hl,length
+    ; Length initialization
+    ld bc,10
+    ld hl,snake.length
     ld (hl),bc
 
-    ; Initialize the coordinates of each part of the snake
+    ; Snake body initialization
     ld de,159
-    ld b,5
+    ld b,10
     ld hl,snake
 init_snake:
     ld (hl),119 ; y-coordinate
@@ -41,7 +42,7 @@ init_snake:
     djnz init_snake
     jr main_loop
 exit:
-    call _ClrScrn
+    call _ClrScrnFull
     call LCD_ResetPalette
     call _DrawStatusBar
     ret
@@ -84,35 +85,48 @@ key_enter:
 ; Game rendering phase
 ; --------------------------------------------------
 render:
-    call _ClrScrnFull
-    ; ld a,$FF
-    ; ld bc,lcdWidth*lcdHeight
-    ; call LCD_ClearLCDHalf
+    ; Clear the screen
+    ld a,$FF
+    ld bc,lcdWidth*lcdHeight
+    call LCD_ClearLCDHalf
+
+    ; The initial address starts at the tail and works
+    ; its way up to the head of the snake
+    ld ix,snake.tail
+    ld bc,(snake.length)
     
-    ld hl,snake
+render_loop_length:
+    
+    ; Push the length of the snake, note that this will need to be re-pushed at
+    ; the end of the loop
+    push bc
+    
     ; Calculate y-position
-    ld bc,(hl)
+    ld bc,(ix)
+    inc ix
+    inc ix
+    inc ix
     ld de,lcdWidth
     ld a,24
-    push hl
     call Math_Multiply_BC_DE
+
     ; Calculate x-position
-    pop ix
-    inc ix
-    inc ix
-    inc ix
-    push ix
     ld bc,(ix)
+    inc ix
+    inc ix
+    inc ix
     add hl,bc
     ld bc,vRam
     add hl,bc
     
     ld a,dimensions
     ld b,a
+
 render_loop_height:
     push bc
     ld a,dimensions
     ld b,a
+
 render_pixel:
     ; Draw pixel and increment print position
     ld (hl),color
@@ -133,12 +147,18 @@ render_pixel:
     pop bc
     djnz render_loop_height
 
+    ; Pop back the length of the snake
+    pop bc
+    dec bc
+    ld a,b
+    or c
+    jr nz,render_loop_length
     ret
 ; --------------------------------------------------
 
 ; --------------------------------------------------
 ; Includes
-; --------------------------------------------------]
+; --------------------------------------------------
 #include "../../Utils/Math/src/Math.asm"
 #include "../../Utils/LCD/src/LCD.asm"
 ; --------------------------------------------------

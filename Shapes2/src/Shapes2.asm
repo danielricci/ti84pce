@@ -4,14 +4,13 @@
 .org userMem-2
 .db tExtTok, tAsm84CeCmp
 
-dimensions .equ 3
+dimensions .equ 3 ; 3x3 per body part
 color .equ $E0
 
 done .equ cmdPixelShadow
 snake .equ done+1
-snake.tail .equ snake
-snake.head .equ snake.tail+30
-snake.length .equ snake.head+6
+snake.length .equ snake
+snake.body .equ snake.length+3
 
 init:
     ; Board setup
@@ -28,7 +27,7 @@ init:
     ; Snake body initialization
     ld de,159
     ld b,c
-    ld hl,snake
+    ld hl,snake.body
 init_snake:
     ld (hl),119 ; y-coordinate
     inc hl
@@ -92,7 +91,7 @@ render:
 
     ; The initial address starts at the tail and works
     ; its way up to the head of the snake
-    ld ix,snake.tail
+    ld ix,snake.body
     ld bc,(snake.length)
     
 render_loop_length:

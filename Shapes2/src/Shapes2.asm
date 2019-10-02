@@ -10,7 +10,7 @@ color .equ $E0
 done .equ cmdPixelShadow
 snake .equ done+1
 snake.tail .equ snake
-snake.head .equ snake.tail+48
+snake.head .equ snake.tail+30
 snake.length .equ snake.head+6
 
 init:
@@ -21,13 +21,13 @@ init:
     call LCD_CopyHL1555Palette
 
     ; Length initialization
-    ld bc,10
+    ld bc,6
     ld hl,snake.length
     ld (hl),bc
 
     ; Snake body initialization
     ld de,159
-    ld b,10
+    ld b,c
     ld hl,snake
 init_snake:
     ld (hl),119 ; y-coordinate

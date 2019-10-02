@@ -8,8 +8,7 @@ dimensions .equ 3 ; 3x3 per body part
 color .equ $E0
 
 done .equ cmdPixelShadow
-snake .equ done+1
-snake.length .equ snake
+snake.length .equ done+1
 snake.body .equ snake.length+3
 
 init:

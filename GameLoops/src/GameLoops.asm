@@ -48,7 +48,8 @@ main_loop:
     ld a,(done)
     cp 1
     jr Z,exit
-    call process_input
+    ;call process_input
+    call key_right
     call render
     jr main_loop
 
@@ -71,7 +72,61 @@ process_input:
 key_up:
 key_left:
 key_down:
+
 key_right:
+    
+    ; Count length number of times (excluding head)
+    ld bc,(snake.length)
+
+    ; initialize the two indexes to pull data from
+    ld hl,snake.body
+    ld de,snake.body
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+
+    ld b,c
+    dec b
+_loop:
+    push bc
+    ; Swap the values
+    ld bc,(hl)
+    ex de,hl
+    ld (hl),bc
+    ex de,hl
+    inc hl
+    inc hl
+    inc hl
+    inc de
+    inc de
+    inc de
+    ; Swap the values
+    ld bc,(hl)
+    ex de,hl
+    ld (hl),bc
+    ex de,hl
+    inc hl
+    inc hl
+    inc hl
+    inc de
+    inc de
+    inc de
+    pop bc
+    djnz _loop
+
+    ; Update head
+    ex de,hl ;now hl is the beginning of the head memory
+    inc hl
+    inc hl
+    inc hl
+    ld de,(hl) ; y value doesnt move
+    inc de ; increment by 3
+    inc de
+    inc de
+    ld (hl),de
     ret
 key_enter:
     ld a,1

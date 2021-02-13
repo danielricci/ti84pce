@@ -1,0 +1,4 @@
+In this folder, place the following:
+
+spasm.exe -- SPASM-ng, ez80 support
+CECompress -- compresses images to be used in 8bpp mode using RLE. Later support will include LZ77, Huffman, and others.

@@ -1,0 +1,13 @@
+	.ref _random
+	.def _rand
+	.assume adl=1
+
+; int rand(void);
+
+_rand:
+	call	_random
+	ld	de,8388608
+	sbc	hl,de
+	ret	p
+	add	hl,de
+	ret

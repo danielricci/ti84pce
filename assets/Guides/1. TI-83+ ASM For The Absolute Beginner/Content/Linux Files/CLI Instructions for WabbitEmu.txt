@@ -1,0 +1,5 @@
+svn co http://wxwabbitemu.googlecode.com/svn/trunk/  wabbitemu
+cd wabbitemu
+./build_wx -w      There might not be a period at the front.  I don't use linux,
+		   but if the period causes an error, just take the period
+		   out.

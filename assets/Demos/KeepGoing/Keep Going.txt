@@ -1,0 +1,38 @@
+          + Keep Going! + Benjamin Ryves 2002 +
+-----------------------------------------------------------
+
+Idea of the game:
+My first real 'game' in ASM for the TI-83Plus.
+The idea is simple: to keep going as long as possible.
+You are the snake that just will not stop growing- you move around
+trying not to eat yourself or hit the walls. Every so often a 'magic
+dot' appears, eat it and you magically shrink back down!
+
+How to play:
+Sen the file kpgoing.8xp to your calc (Ti-83Plus) 
+Run the game by typing 'Asm(prgmKPGOING)' at the home screen.
+After the splash screen, hit 1, 2 or 3 to select speed.
+You start in the top left, moving right. Use the arrow keys to move.
+When you spot a pip, eat it to shrink back again.
+Press 'Clear' at any time to quit.
+If asked to play again, press 'Y' (really it should be '1').
+Try to get a high score!
+
+Source code:
+I don't do comments :)
+Try to decipher it yourself. (OK, I suck at ASM. Who cares? This game
+is fun (or at least more fun than the maths your meant to use the calc
+for!))
+
+Bugs/Problems:
++Key handling is odd: only press Up/Down/Left/Right/Clear. Other keys 
+won't crash the calc, but might do odd things: Enter, for instance, 
+does the same thing as the Down key!
++Nit-picking really: when you exit, it fails to dump you at the Home
+screen properly. You need to press Clear after the game to do so. (It
+puts you on the Graph Screen, no axes, no graph). Truly odd. Any ideas?
+
+> Benjamin Ryves 
+> benryves@techie.com 
+> http://www.calc83plus/freeservers.com
+

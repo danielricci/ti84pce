@@ -1,0 +1,1 @@
+..\..\tools\CEcompress 13669478 images.txt

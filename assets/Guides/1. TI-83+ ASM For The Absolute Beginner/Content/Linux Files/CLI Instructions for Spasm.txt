@@ -1,0 +1,3 @@
+svn co https://wabbit.codeplex.com/svn/Wabbitstudio/Source/SPASM spasm
+cd spasm
+sudo make

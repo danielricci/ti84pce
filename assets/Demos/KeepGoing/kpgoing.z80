@@ -1,0 +1,454 @@
+.list
+#define equ .equ
+#define EQU .equ
+#define end .end
+#include ti83plus.inc
+.nolist
+#define bcall(label) RST 28h \ .dw label
+#define UpKey 48
+#define RtKey 52
+#define DnKey 55
+#define LtKey 54
+#define ClKey 92
+
+        .org    $9D93
+	.db     $BB,$6D
+	bcall(_runindicoff)
+	bcall(_clrlcdfull)
+
+	ld hl,SplashScreen
+	ld de,plotsscreen
+	ld bc,768
+	ldir
+	bcall(_grbufcpy)
+	bcall(_getkey)
+SelectGame:
+	ld a,4
+	ld (HeadX),a
+	ld a,59
+	ld (HeadY),a
+	ld a,0
+	ld (Score),a
+	ld a,2
+	ld (Direction),a
+	bcall(_clrlcdfull)
+	ld a,20
+	ld (pencol),a
+	ld a,20
+	ld (penrow),a
+	ld hl,SpeedS
+	bcall(_vputs)	
+	ld a,20
+	ld (pencol),a
+	ld a,27
+	ld (penrow),a
+	ld hl,SpeedM
+	bcall(_vputs)	
+	ld a,20
+	ld (pencol),a
+	ld a,34
+	ld (penrow),a
+	ld hl,SpeedF
+	bcall(_vputs)	
+SpeedSelect:
+	bcall(_getkey)
+	cp k1
+	jp z,SetSlow
+	cp k2
+	jp z,SetMed
+	cp k3
+	jp z,SetFast
+	jp SpeedSelect
+
+SetSlow:
+	ld a,10
+	ld (Speed),a
+	jp StartGame
+
+SetMed:
+	ld a,5
+	ld (Speed),a
+	jp StartGame
+
+SetFast:
+	ld a,3
+	ld (Speed),a
+	jp StartGame
+
+StartGame:
+	call DrawField
+	call LongPause
+	ld hl,0
+	ld (Score),hl
+
+AddToLine:
+	call pause
+	call KeyInp
+	cp LtKey
+	jp z,LeftK
+	cp RtKey
+	jp z,RightK
+	cp UpKey
+	jp z,UpK
+	cp DnKey
+	jp z,DownK
+	cp ClKey
+	jp z,Die
+KeyRead:
+	ld a,(HeadX)
+	ld b,a
+	ld a,(HeadY)
+	ld c,a
+	ld d,3
+	bcall(_IPoint)
+	jr nz,Die
+	ld a,(HeadX)
+	ld b,a
+	ld a,(HeadY)
+	ld c,a
+	ld d,1
+	bcall(_IPoint)
+	
+	ld a,(Direction)
+	cp 1
+	jp z,MoveUp	
+	cp 2
+	jp z,MoveRight
+	cp 3
+	jp z,MoveDown
+	cp 4
+	jp z,MoveLeft
+
+MoveUp: 
+	ld a,(HeadY)
+	inc a
+	ld (HeadY),a
+	jp AddToLine
+MoveDown:	
+	ld a,(HeadY)
+	dec a
+	ld (HeadY),a
+	jp AddToLine
+MoveLeft: 
+	ld a,(HeadX)
+	dec a
+	ld (HeadX),a
+	jp AddToLine
+MoveRight:	
+	ld a,(HeadX)
+	inc a
+	ld (HeadX),a
+	jp AddToLine		
+
+UpK: 	ld a,1
+	ld (Direction),a
+	jp KeyRead
+
+DownK: 	ld a,3
+	ld (Direction),a
+	jp KeyRead
+
+LeftK: 	ld a,4
+	ld (Direction),a
+	jp KeyRead
+
+RightK: ld a,2
+	ld (Direction),a
+	jp KeyRead
+
+Die:	ld a,(HeadX)
+	ld b,a
+	ld a,(PipX)
+	cp b
+	jp nz, YesDie
+	ld a,(HeadY)
+	ld b,a
+	ld a,(PipY)
+	cp b
+	jp nz, YesDie
+	jp NoDie	
+YesDie:	
+	call LongPause
+	bcall(_clrLCDfull)
+	ld a,25
+	ld (pencol),a
+	ld a,24
+	ld (penrow),a
+	ld hl,ScoreCap
+	bcall(_vputs)
+	ld hl,(Score)
+	bcall(_setxxxxop2)
+	bcall(_op2toop1)
+	ld a,5
+	bcall(_dispop1a)
+	bcall(_getkey)
+	bcall(_clrlcdfull)
+	ld a,15
+	ld (pencol),a
+	ld a,25
+	ld (penrow),a
+	ld hl,PlayAgain
+	bcall(_vputs)
+	bcall(_getkey)
+	cp k1
+	jp z,SelectGame
+Done:	bcall(_grbufclr)
+	bcall(_clrlcdfull)
+	ret
+NoDie:
+	call DrawField
+	jp AddToLine
+
+KeyInp:
+	ld a,$FF
+	out (1),a
+	ld a,c
+	out (1),a
+	in a,(1)
+	inc a
+	jr nz,Found
+	rlc c
+	djnz KeyInp
+Found:	bcall(_setxxop1)
+	ld a,0
+	bcall(_convop1)
+	ret
+
+Pause:	ld hl,(Score)
+	inc hl
+	ld (Score),hl
+	ld a,(Progress)
+	inc a
+	ld (Progress),a
+	cp 255
+	jp z,Progressed
+DoneProgression:
+	ld a,(Speed)
+PauseAgain:
+	dec a
+	cp 0
+	jp z,Paused
+	halt
+	jp PauseAgain
+Paused:
+	ret
+
+Progressed:
+	ld a,(PipX)
+	ld b,a
+	ld a,(PipY)
+	ld c,a
+	ld d,0
+	bcall(_IPoint)
+	
+BadRand:
+	ld a,96
+	call RandNum
+	bcall(_convop1)
+	ld (PipX),a
+
+	ld a,64
+	call RandNum
+	bcall(_convop1)
+	ld (PipY),a
+
+	ld a,(PipX)
+	ld b,a
+	ld a,(PipY)
+	ld c,a
+	ld d,3
+	bcall(_IPoint)
+	jr nz,BadRand
+
+	ld a,(PipX)
+	ld b,a
+	ld a,(PipY)
+	ld c,a
+	ld d,1
+	bcall(_IPoint)
+
+	ld a,0
+	ld (Progress),a
+	;call DrawField
+	jp DoneProgression
+
+LongPause:
+	halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt
+	halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt \ halt
+	ret
+
+DrawField:
+	ld hl,PlayField
+	ld de,plotsscreen
+	ld bc,768
+	ldir
+	bcall(_grbufcpy)
+	ret
+
+RandNum:
+	bcall(_random)
+	bcall(_setxxop2)
+	bcall(_fpmult)
+	bcall(_int)	
+	ret
+
+ScoreCap:
+	.db "Score: ",0
+
+HeadX:
+	.byte 4
+HeadY:
+	.byte 59
+Direction:
+	.byte 2
+Speed:
+	.byte 0
+SpeedS:
+	.db "1) Slow",0
+SpeedM:
+	.db "2) Medium",0
+SpeedF:
+	.db "3) Fast",0
+Score:
+	.word 0
+Progress:
+	.byte 0
+PipX:
+	.byte 0
+PipY:
+	.byte 0
+
+PlayAgain:
+	.db "Play again? (Y/N)",0
+PlayField:
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $C0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+SplashScreen:
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$0F,$FF,$FF,$FF,$FF,$FF,$E0
+ .db $00,$00,$00,$00,$00,$08,$00,$00,$00,$00,$00,$20
+ .db $03,$18,$00,$00,$00,$08,$00,$00,$00,$00,$00,$20
+ .db $03,$30,$00,$00,$00,$08,$00,$E0,$00,$00,$00,$20
+ .db $03,$61,$F1,$F3,$70,$08,$01,$70,$00,$00,$00,$20
+ .db $03,$C3,$1B,$1B,$98,$08,$03,$FB,$33,$33,$30,$20
+ .db $03,$83,$1B,$1B,$18,$08,$03,$FD,$DD,$DD,$D8,$20
+ .db $03,$C3,$FB,$FB,$18,$08,$03,$FF,$FF,$FF,$F8,$20
+ .db $03,$63,$03,$03,$18,$08,$01,$F3,$33,$33,$30,$20
+ .db $03,$33,$0B,$0B,$18,$08,$00,$E0,$00,$00,$30,$20
+ .db $03,$19,$F1,$F3,$F0,$08,$00,$00,$00,$00,$58,$20
+ .db $00,$00,$00,$03,$00,$08,$00,$00,$00,$00,$78,$20
+ .db $00,$00,$00,$03,$00,$08,$00,$00,$00,$00,$30,$20
+ .db $00,$00,$00,$03,$00,$08,$03,$33,$33,$33,$30,$20
+ .db $00,$00,$0C,$00,$00,$08,$05,$DD,$DD,$DD,$D8,$20
+ .db $07,$C0,$0C,$00,$00,$C8,$07,$FF,$FF,$FF,$F8,$20
+ .db $0C,$20,$00,$00,$00,$C8,$03,$33,$33,$33,$30,$20
+ .db $0C,$27,$CD,$B8,$FC,$C8,$03,$00,$00,$00,$00,$20
+ .db $0C,$0C,$6D,$CD,$8C,$C8,$05,$80,$00,$00,$00,$20
+ .db $0C,$EC,$6D,$8D,$8C,$C8,$07,$80,$00,$00,$00,$20
+ .db $0C,$6C,$6D,$8D,$8C,$C8,$03,$00,$00,$00,$00,$20
+ .db $0C,$6C,$6D,$8D,$8C,$08,$03,$30,$00,$00,$00,$20
+ .db $0C,$6C,$6D,$8D,$9C,$C8,$05,$D8,$00,$00,$00,$20
+ .db $07,$E7,$CD,$8C,$EC,$C8,$07,$F8,$00,$00,$00,$20
+ .db $00,$00,$00,$00,$0C,$08,$03,$30,$00,$00,$00,$20
+ .db $00,$00,$00,$01,$0C,$08,$00,$00,$00,$00,$00,$20
+ .db $00,$00,$00,$00,$F8,$08,$00,$00,$00,$00,$00,$20
+ .db $00,$00,$00,$00,$00,$0F,$FF,$FF,$FF,$FF,$FF,$E0
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$07,$FF,$BF,$FF,$7F,$83,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$7B,$FF,$FF,$FF,$FF,$BD,$FF,$FF,$FF,$FF
+ .db $FF,$FF,$7B,$31,$B3,$03,$47,$BD,$56,$CE,$3F,$FF
+ .db $FF,$FF,$06,$D6,$BD,$6D,$5B,$83,$56,$B5,$FF,$FF
+ .db $FF,$FF,$7A,$16,$B1,$6D,$5B,$BD,$56,$86,$7F,$FF
+ .db $FF,$FF,$7A,$F6,$AD,$6D,$5B,$BD,$59,$BF,$BF,$FF
+ .db $FF,$FF,$07,$36,$B1,$6D,$5B,$BD,$99,$CC,$7F,$FF
+ .db $FF,$FF,$FF,$FF,$BF,$FF,$FF,$FF,$DF,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$BF,$FF,$FF,$FF,$3F,$FF,$FF,$FF
+ .db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.end
+END

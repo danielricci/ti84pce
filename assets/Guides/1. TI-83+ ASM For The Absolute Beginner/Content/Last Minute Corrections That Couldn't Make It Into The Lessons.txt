@@ -1,0 +1,33 @@
+Lesson 11:
+
+* .option BM_SHD = 2 and .option bm_min_w = 96 must be before your label.  However, as you can see on page 9, the lines don't have to be directly on top of the label
+
+* On page 9, .option bm_min_w = 8 should be .option bm_min_w = 96
+
+
+Lesson 12:
+
+
+* On page 4, there's a line that says "Refer to Lesson 12."  It should say "Refer to Lesson 9."
+
+
+
+Lesson 14:
+
+* "Learn ASM in 28 days" is located in the Appendices Folder.
+* In "Learn ASM in 28 days", look under Appendicies\Technical References and Datasheets.  "Z80 Instruction Set" contains details on all instructions you can use, including what causes Z, NZ, C and NC
+
+Appendix A: 
+
+* You cannot use "ret" to exit an application.  When you need to end an application, type in the following where you want it to exit:
+
+	bjump(_JForceCmdNoChar)
+
+
+* You can find app.inc in "Windows Files", "Mac Files", and "Linux Files"
+
+
+
+Appendix D:
+
+* You can find the files you need for the example program in the "Appendix D Files" folder

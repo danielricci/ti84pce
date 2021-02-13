@@ -1,0 +1,15 @@
+[submodule "src/tools/convhex"]
+	path = tools/convhex
+	url = https://github.com/MattWaltz/convhex
+[submodule "src/tools/convpng"]
+	path = tools/convpng
+	url = https://github.com/MattWaltz/convpng
+[submodule "tools/convtile"]
+	path = tools/convtile
+	url = https://github.com/MattWaltz/convtile.git
+[submodule "tools/fasmg/fasmg-ez80"]
+	path = tools/fasmg/fasmg-ez80
+	url = https://github.com/jacobly0/fasmg-ez80.git
+[submodule "tools/convfont"]
+	path = tools/convfont
+	url = https://github.com/drdnar/convfont.git
